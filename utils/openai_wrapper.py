@@ -26,7 +26,7 @@ def ass_message(thread_id, content):
             result = messages.data[0].content[0].text.value
             break
         # 继续请求
-        time.sleep(1)
+        time.sleep(0.1)
 
     return result
 
