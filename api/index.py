@@ -47,7 +47,7 @@ def get_ass_message():
 
 
 @app.route('/delete_thread', methods=['DELETE'])
-def create_thread():
+def delete_thread():
     thread_id = request.values.get("thread_id")
     delete_ass_thread(thread_id)
     return return_result()
