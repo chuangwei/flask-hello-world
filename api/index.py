@@ -31,7 +31,7 @@ def about():
 @app.route('/get_thread', methods=['GET'])
 def create_thread():
     if request.method != "GET":
-        return 'ERROR'
+        return return_result(code='3', msg="请求方式错误!", show_type=3)
     thread_id = create_ass_thread()
     return return_result(data={"thread_id": thread_id})
 
@@ -39,7 +39,7 @@ def create_thread():
 @app.route('/ass_message', methods=['POST'])
 def get_ass_message():
     if request.method != "POST":
-        return 'ERROR'
+        return return_result(code='3', msg="请求方式错误!", show_type=3)
     thread_id = request.json.get("thread_id")
     content = request.json.get("content")
     result = ass_message(thread_id=thread_id, content=content)
@@ -48,6 +48,8 @@ def get_ass_message():
 
 @app.route('/delete_thread', methods=['DELETE'])
 def delete_thread():
+    if request.method != "DELETE":
+        return return_result(code='3', msg="请求方式错误!", show_type=3)
     thread_id = request.values.get("thread_id")
     delete_ass_thread(thread_id)
     return return_result()
