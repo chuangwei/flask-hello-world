@@ -1,7 +1,7 @@
 from flask import Flask, jsonify
 from flask import request
 
-from utils.openai_wrapper import create_ass_thread, ass_message, delete_ass_thread
+from utils.openai_wrapper import create_ass_thread, create_ass_run_message, delete_ass_thread, get_run_status
 
 app = Flask(__name__)
 
@@ -28,28 +28,34 @@ def about():
     return 'About'
 
 
-@app.route('/get_thread', methods=['GET'])
+@app.route('/thread', methods=['GET', 'DELETE'])
 def create_thread():
-    if request.method != "GET":
+    if request.method == "GET":
+        thread_id = create_ass_thread()
+        return return_result(data={"thread_id": thread_id})
+    elif request.method == "DELETE":
+        thread_id = request.values.get("thread_id")
+        delete_ass_thread(thread_id)
+        return return_result()
+    else:
         return return_result(code='3', msg="请求方式错误!", show_type=3)
-    thread_id = create_ass_thread()
-    return return_result(data={"thread_id": thread_id})
 
 
-@app.route('/ass_message', methods=['POST'])
+@app.route('/message', methods=['POST'])
 def get_ass_message():
     if request.method != "POST":
         return return_result(code='3', msg="请求方式错误!", show_type=3)
     thread_id = request.json.get("thread_id")
     content = request.json.get("content")
-    result = ass_message(thread_id=thread_id, content=content)
-    return return_result(data={"result": result})
+    thread_id, run_id = create_ass_run_message(thread_id=thread_id, content=content)
+    return return_result(data={"thread_id": thread_id, "run_id": run_id})
 
 
-@app.route('/delete_thread', methods=['DELETE'])
+@app.route('/message_status', methods=['GET'])
 def delete_thread():
-    if request.method != "DELETE":
+    if request.method != "GET":
         return return_result(code='3', msg="请求方式错误!", show_type=3)
     thread_id = request.values.get("thread_id")
-    delete_ass_thread(thread_id)
-    return return_result()
+    run_id = request.values.get("run_id")
+    data = get_run_status(thread_id, run_id)
+    return return_result(data=data)

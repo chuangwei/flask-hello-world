@@ -12,23 +12,43 @@ def create_ass_thread():
     return thread.id
 
 
-def ass_message(thread_id, content):
+# def ass_message(thread_id, content):
+#     message = client.beta.threads.messages.create(thread_id=thread_id, role="user", content=content, timeout=300)
+#
+#     run = client.beta.threads.runs.create(thread_id=thread_id, assistant_id=asstID, instructions="", timeout=300)
+#
+#     while True:
+#         # 查询消息的状态
+#         run = client.beta.threads.runs.retrieve(thread_id=thread_id, run_id=run.id, timeout=300)
+#         # 如果状态完成，则获取结果，break
+#         if run.status == "completed":
+#             messages = client.beta.threads.messages.list(thread_id=thread_id)
+#             result = messages.data[0].content[0].text.value
+#             break
+#         # 继续请求
+#         time.sleep(0.1)
+#
+#     return result
+def create_ass_run_message(thread_id, content):
     message = client.beta.threads.messages.create(thread_id=thread_id, role="user", content=content, timeout=300)
-
     run = client.beta.threads.runs.create(thread_id=thread_id, assistant_id=asstID, instructions="", timeout=300)
+    return thread_id, run.id
 
-    while True:
-        # 查询消息的状态
-        run = client.beta.threads.runs.retrieve(thread_id=thread_id, run_id=run.id, timeout=300)
-        # 如果状态完成，则获取结果，break
-        if run.status == "completed":
-            messages = client.beta.threads.messages.list(thread_id=thread_id)
-            result = messages.data[0].content[0].text.value
-            break
-        # 继续请求
-        time.sleep(0.1)
 
-    return result
+def get_run_status(thread_id, run_id):
+    run = client.beta.threads.runs.retrieve(thread_id=thread_id, run_id=run_id, timeout=300)
+    # run.status:
+    # queued, in_progress, requires_action, cancelling, cancelled, failed, completed, or expired
+    if run.status == "completed":
+        # limit: A limit on the number of objects to be returned.
+        # Limit can range between 1 and 100, and the default is 20
+        messages = client.beta.threads.messages.list(thread_id=thread_id, limit=1)
+        result = messages.data[0].content[0].text.value
+        return {"thread_id": thread_id, "run_id": run_id, "result": result, "status": "completed"}
+    elif run.status in ["queued", "in_progress", "requires_action"]:
+        return {"thread_id": thread_id, "run_id": run_id, "result": None, "status": "pending"}
+    else:
+        return {"thread_id": thread_id, "run_id": run_id, "result": None, "status": "failed"}
 
 
 def delete_ass_thread(thread_id):
@@ -37,7 +57,3 @@ def delete_ass_thread(thread_id):
 
 if __name__ == "__main__":
     thread_id = create_ass_thread()
-    print(ass_message(thread_id, "我要变漂亮需要怎么做？"))
-    print(ass_message(thread_id, "怎么画眉毛？"))
-    print(ass_message(thread_id, "怎么画口红？"))
-    delete_ass_thread(thread_id)
