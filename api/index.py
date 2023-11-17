@@ -63,7 +63,7 @@ def delete_thread():
 
 
 @app.route('/vision', methods=['POST'])
-def delete_thread():
+def get_vision():
     if request.method != "POST":
         return return_result(code='3', msg="请求方式错误!", show_type=3)
     message = request.json.get("message")
