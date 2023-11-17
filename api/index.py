@@ -1,7 +1,8 @@
 from flask import Flask, jsonify
 from flask import request
 
-from utils.openai_wrapper import create_ass_thread, create_ass_run_message, delete_ass_thread, get_run_status
+from utils.openai_wrapper import create_ass_thread, create_ass_run_message, delete_ass_thread, get_run_status, \
+    ass_get_vision
 
 app = Flask(__name__)
 
@@ -58,4 +59,13 @@ def delete_thread():
     thread_id = request.values.get("thread_id")
     run_id = request.values.get("run_id")
     data = get_run_status(thread_id, run_id)
+    return return_result(data=data)
+
+
+@app.route('/vision', methods=['POST'])
+def delete_thread():
+    if request.method != "POST":
+        return return_result(code='3', msg="请求方式错误!", show_type=3)
+    message = request.json.get("message")
+    data = ass_get_vision(message)
     return return_result(data=data)
